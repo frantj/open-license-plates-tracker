@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h4 mb-0">Edit Sighting</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('edit_sighting', sighting_id=sighting.id) }}">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="state" class="form-label">State *</label>
+                            <input type="text" class="form-control" id="state" name="state" required 
+                                   value="{{ sighting.state }}" pattern="[A-Za-z]{2}" title="Two-letter state code">
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="license_plate" class="form-label">Plate Number *</label>
+                            <input type="text" class="form-control" id="license_plate" name="license_plate" required 
+                                   value="{{ sighting.license_plate }}" pattern="[A-Za-z0-9-]+" title="Plate number (no spaces)">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="car_make" class="form-label">Make</label>
+                            <input type="text" class="form-control" id="car_make" name="car_make" 
+                                   value="{{ sighting.car_make }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="car_model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="car_model" name="car_model" 
+                                   value="{{ sighting.car_model }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="color" class="form-label">Color</label>
+                        <input type="text" class="form-control" id="color" name="color" 
+                               value="{{ sighting.color }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sighting_time" class="form-label">Sighting Time</label>
+                        <input type="datetime-local" class="form-control" id="sighting_time" name="sighting_time" 
+                               value="{{ sighting.timestamp.strftime('%Y-%m-%dT%H:%M') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" 
+                               value="{{ sighting.location if sighting.location else '' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ sighting.notes if sighting.notes else '' }}</textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
