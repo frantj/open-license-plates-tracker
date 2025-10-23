@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h4 mb-0">Add New Sighting</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_sighting') }}" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="state" class="form-label">State *</label>
+                            <input type="text" class="form-control" id="state" name="state" required 
+                                   placeholder="e.g., DC" pattern="[A-Za-z]{2}" title="Two-letter state code">
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="license_plate" class="form-label">Plate Number *</label>
+                            <input type="text" class="form-control" id="license_plate" name="license_plate" required 
+                                   placeholder="e.g., ABC123" pattern="[A-Za-z0-9-]+" title="Plate number (no spaces)">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="car_make" class="form-label">Make *</label>
+                            <input type="text" class="form-control" id="car_make" name="car_make" required 
+                                   placeholder="e.g., Toyota">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="car_model" class="form-label">Model *</label>
+                            <input type="text" class="form-control" id="car_model" name="car_model" required 
+                                   placeholder="e.g., Camry">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="color" class="form-label">Color *</label>
+                        <input type="text" class="form-control" id="color" name="color" required 
+                               placeholder="e.g., Blue">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sighting_time" class="form-label">Sighting Time (optional)</label>
+                        <input type="datetime-local" class="form-control" id="sighting_time" name="sighting_time">
+                        <div class="form-text">Leave blank to use the current time.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location *</label>
+                        <input type="text" class="form-control" id="location" name="location" required 
+                               placeholder="e.g., 123 Main St, City">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                 placeholder="Any additional details about the sighting"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Photo (Optional)</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <div class="form-text">Add one photo per sighting. Allowed formats: PNG, JPG, JPEG, GIF, WEBP (Max 5MB)</div>
+                        <div id="imagePreview" class="mt-2" style="display: none;">
+                            <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 300px; max-height: 300px;">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary w-100">Add Sighting</button>
+                    </div>
+                </form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pre-populate the sighting time with the current local time
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const formattedNow = now.toISOString().slice(0, 16);
+        document.getElementById('sighting_time').value = formattedNow;
+
+        const plateInput = document.getElementById('license_plate');
+        const makeInput = document.getElementById('car_make');
+        const modelInput = document.getElementById('car_model');
+        const colorInput = document.getElementById('color');
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+
+        // Image preview functionality
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+
+        plateInput.addEventListener('blur', function() {
+            const plate = plateInput.value.trim();
+            if (plate.length > 3) { // Only search if plate is reasonably long
+                fetch(`/api/car_info/${plate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.found) {
+                            makeInput.value = data.car_make;
+                            modelInput.value = data.car_model;
+                            colorInput.value = data.color;
+                        }
+                    })
+                    .catch(error => console.error('Error fetching car info:', error));
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h1>Recent Sightings</h1>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{{ url_for('add_sighting') }}" class="btn btn-primary">Add New Sighting</a>
+    </div>
+</div>
+
+<!-- Sorting and Filtering Form -->
+<div class="card bg-light mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('index') }}" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="sort_by" class="form-label">Sort By</label>
+                <select name="sort_by" id="sort_by" class="form-select">
+                    <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Date (Newest First)</option>
+                    <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Date (Oldest First)</option>
+                    <option value="plate_asc" {% if sort_by == 'plate_asc' %}selected{% endif %}>State & Plate (A-Z)</option>
+                    <option value="plate_desc" {% if sort_by == 'plate_desc' %}selected{% endif %}>State & Plate (Z-A)</option>
+                    <option value="make_asc" {% if sort_by == 'make_asc' %}selected{% endif %}>Car Make (A-Z)</option>
+                    <option value="make_desc" {% if sort_by == 'make_desc' %}selected{% endif %}>Car Make (Z-A)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">Apply</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if sightings %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for sighting in sightings %}
+        <div class="col">
+            <div class="card h-100 sighting-card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <a href="{{ url_for('edit_sighting', sighting_id=sighting.id) }}" class="text-white" style="text-decoration: underline; cursor: pointer;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            {{ sighting.state }} {{ sighting.license_plate }}
+                            {% if sighting.image_filename %}
+                            <span class="badge bg-light text-primary ms-1" title="Has image" style="font-size: 0.7rem;">📷</span>
+                            {% endif %}
+                        </a>
+                    </h5>
+                    <form action="{{ url_for('delete_sighting', sighting_id=sighting.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this sighting?');">
+                        <button type="submit" class="btn btn-sm btn-danger" style="--bs-btn-padding-y: .1rem; --bs-btn-padding-x: .4rem; --bs-btn-font-size: .75rem;">X</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>Vehicle:</strong> {{ sighting.car_make }} {{ sighting.car_model }}<br>
+                        <strong>Color:</strong> {{ sighting.color }}<br>
+                        <strong>Location:</strong> {{ sighting.location }}<br>
+                        <strong>Date:</strong> {{ sighting.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                        {% if sighting.notes %}
+                            <br><strong>Notes:</strong> {{ sighting.notes }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        No sightings yet. <a href="{{ url_for('add_sighting') }}" class="alert-link">Add the first sighting!</a>
+    </div>
+{% endif %}
+{% endblock %}
