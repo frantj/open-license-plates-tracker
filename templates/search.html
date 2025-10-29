@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>Search Results</h1>
+    <p class="lead">
+        {% if state %}<strong>State:</strong> {{ state }}{% endif %}
+        {% if state and plate %}, {% endif %}
+        {% if plate %}<strong>Plate:</strong> {{ plate }}{% endif %}
+    </p>
+    <p class="text-muted">{{ sightings|length }} result(s) found</p>
+</div>
+
+{% if sightings %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Image</th>
+                    <th>State</th>
+                    <th>Plate Number</th>
+                    <th>Vehicle</th>
+                    <th>Color</th>
+                    <th>Location</th>
+                    <th>Date/Time</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sighting in sightings %}
+                <tr style="cursor: pointer;" onclick="window.location.href='{{ url_for('index') }}';" title="View details">
+                    <td>
+                        {% if sighting.image_filename %}
+                        <a href="{{ url_for('serve_image', filename=sighting.image_filename) }}" 
+                           target="_blank" 
+                           onclick="event.stopPropagation();"
+                           class="text-primary">📷 View</a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{ sighting.state }}</td>
+                    <td><strong>{{ sighting.license_plate }}</strong></td>
+                    <td>{{ sighting.car_make }} {{ sighting.car_model }}</td>
+                    <td>{{ sighting.color }}</td>
+                    <td>{{ sighting.location }}</td>
+                    <td>{{ sighting.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ sighting.notes if sighting.notes else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-warning">
+        No sightings found matching your search criteria.
+        <a href="{{ url_for('add_sighting') }}" class="alert-link">Add a new sighting</a>.
+    </div>
+{% endif %}
+
+<div class="mt-4">
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+        &larr; Back to all sightings
+    </a>
+</div>
+{% endblock %}
